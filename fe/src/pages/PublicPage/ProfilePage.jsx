@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
-import { Camera } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Card, Form, Button, Spinner, Badge } from 'react-bootstrap';
+import { Camera, Trash2 } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import useAuth from '../../hooks/useAuth';
@@ -25,6 +25,8 @@ export default function ProfilePage() {
         newPassword: '',
         confirmNewPassword: ''
     });
+
+
 
     const handleAvatarChange = async (e) => {
         const file = e.target.files?.[0];

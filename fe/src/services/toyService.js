@@ -45,13 +45,14 @@ const getToyByStatus = async (status, params = {}) => {
 
 const createToy = async (toyData) => {
     try {
-        const response = await axiosInstance.post(API_ENDPOINTS.TOYS, toyData);
+        const response = await axiosInstance.post(API_ENDPOINTS.TOYSMERGE, toyData);
         return response.data;
     } catch (error) {
         console.error('Error creating toy:', error);
         throw error;
     }
 };
+
 
 const updateToy = async (id, toyData) => {
     try {

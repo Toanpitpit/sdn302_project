@@ -16,9 +16,7 @@ const handleValidationErrors = (req, res, next) => {
 };
 
 exports.validateToy = [
-  body('ownerId')
-    .notEmpty().withMessage('ownerId is required')
-    .isMongoId().withMessage('ownerId must be a valid MongoDB ID'),
+
   body('title')
     .notEmpty().withMessage('title is required')
     .trim()

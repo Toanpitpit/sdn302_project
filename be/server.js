@@ -33,7 +33,8 @@ require('./models/Booking');
 require('./models/Inspection');
 require('./models/Transaction');
 require('./models/Rating');
-require('./models/Invoice');
+require('./models/toymerge');
+
 
 
 // Routes
@@ -54,15 +55,15 @@ app.use((req, res, next) => {
     success: false,
     message: "Resource not found"
   });
-}); 
+});
 
 app.use((err, req, res, next) => {
-  console.error(err.stack); 
-  
+  console.error(err.stack);
+
   const statusCode = err.status || 500;
   res.status(statusCode).json({
     success: false,
-    message: statusCode === 500 ? "Internal Server Error" : err.message 
+    message: statusCode === 500 ? "Internal Server Error" : err.message
   });
 });
 

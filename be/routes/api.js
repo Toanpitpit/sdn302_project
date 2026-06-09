@@ -17,7 +17,6 @@ const {
   checkToyOwnership,
   checkToyOwnershipByToyId,
   requireAuth,
-  checkOwnerIdMatch,
 } = require('../middleware/toyAuthMiddleware');
 const {
   validateToy,
@@ -44,6 +43,8 @@ router.get('/users/me', protect, userController.getProfile);
 router.put('/users/me', protect, validateUpdateProfile, userController.updateProfile);
 router.post('/users/me/change_password', protect, validateUpdatePassword, userController.changePassword);
 router.put('/users/me/avatar', protect, upload.single('avatar'), userController.updateAvatar);
+router.post('/users/me/favorites', protect, userController.toggleFavorite);
+router.get('/users/me/favorites', protect, userController.getFavorites);
 
 // Admin User Management
 router.get('/users', protect, authorize('ADMIN'), userController.getAllUsers);
@@ -53,7 +54,6 @@ router.patch('/users/:id/status', protect, authorize('ADMIN'), userController.up
 
 
 // ==================== TOY ROUTES ====================
-// IMPORTANT: Specific routes before parameterized routes
 router.get('/toys/featured', toyController.getFeaturedToys);
 router.get('/toys/pending', toyController.getPendingToys);
 router.get('/toys/categories/all', toyController.getAllCategories);
@@ -66,7 +66,12 @@ router.post(
   upload.array('images', 5),
   toyController.uploadToyImages
 );
-router.post('/toys', protect, validateToyWithDetails, checkOwnerIdMatch, toyController.createToy);
+// router.post('/toys', protect, validateToyWithDetails, toyController.createToy);
+
+router.post('/toymegre', protect, validateToyWithDetails, toyController.createToyMerge);
+
+
+
 router.put('/toys/:id', protect, validateMongoId, checkToyOwnership, validateToyPartialUpdate, toyController.updateToy);
 router.patch('/toys/:id/status', protect, validateMongoId, checkToyOwnership, validateToyStatusUpdate, toyController.updateToyStatus);
 router.delete('/toys/:id', protect, validateMongoId, checkToyOwnership, toyController.deleteToy);

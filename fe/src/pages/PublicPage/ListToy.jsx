@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Container, Row, Col, Form, Button, Spinner, Pagination, Card, Badge, InputGroup, Dropdown } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, Filter, ChevronDown } from 'lucide-react';
+import { Search, X, Filter, ChevronDown, Heart } from 'lucide-react';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import useToys from '../../hooks/useToys';
+import useAuth from '../../hooks/useAuth';
 import toyService from '../../services/toyService';
+import userService from '../../services/userService';
 import '../../styles/pages/ListToy.css';
 
 const STATUS_BADGE = {
@@ -18,9 +20,41 @@ const STATUS_BADGE = {
 function ToyCard({ toy, onClick }) {
   const currentStatus = (toy.status || '').toUpperCase();
   const badge = STATUS_BADGE[currentStatus] || { bg: 'secondary', label: currentStatus };
+
+  const { userProfile, toggleFavoriteWrapper } = useAuth();
+  const isFavorite = userProfile?.favoriteToys?.includes(toy._id);
+
+  const handleFavoriteClick = async (e) => {
+    e.stopPropagation();
+    if (!userProfile) {
+        return;
+    }
+    await toggleFavoriteWrapper(toy._id);
+  };
+
   return (
-    <Card className="h-100 public-toy-list-card shadow-sm" onClick={onClick}>
-      <div className="public-toy-list-img-wrap">
+    <Card className="h-100 public-toy-list-card shadow-sm" onClick={onClick} style={{ cursor: 'pointer' }}>
+      <div className="public-toy-list-img-wrap" style={{ position: 'relative' }}>
+        <button
+            onClick={handleFavoriteClick}
+            style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                background: 'white',
+                border: 'none',
+                borderRadius: '50%',
+                padding: '6px',
+                zIndex: 10,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}
+            title={isFavorite ? "Gỡ khỏi yêu thích" : "Thêm vào yêu thích"}
+        >
+            <Heart size={18} fill={isFavorite ? '#ff4757' : 'none'} color={isFavorite ? '#ff4757' : '#6b7280'} />
+        </button>
         <Card.Img
           variant="top"
           src={toy.thumbnail || 'https://via.placeholder.com/300x200?text=No+Image'}
@@ -56,17 +90,33 @@ export default function ListToy() {
     setFilters, setPage, activeFilterCount, clearFilters,
   } = useToys();
 
+  const { userProfile } = useAuth();
+
   const [categories, setCategories] = useState([]);
   const [searchInput, setSearchInput] = useState(search);
+  
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [favoriteToysList, setFavoriteToysList] = useState([]);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
 
-  // Fetch categories once
+  useEffect(() => {
+    if (showFavoritesOnly && userProfile) {
+      setLoadingFavorites(true);
+      userService.getFavorites().then(res => {
+        if (res.success) setFavoriteToysList(res.data);
+        setLoadingFavorites(false);
+      });
+    }
+  }, [showFavoritesOnly, userProfile?.favoriteToys]); // listen to favoriteToys to auto refresh when toggled
+
+
   useEffect(() => {
     toyService.getAllCategories().then((res) => {
       if (res.success) setCategories(res.data);
     });
   }, []);
 
-  // Sync input khi search URL thay đổi (vd: navigate từ CategorySection)
+
   useEffect(() => {
     setSearchInput(search);
   }, [search]);
@@ -89,7 +139,6 @@ export default function ListToy() {
     setFilters({ search: '', category, status });
   };
 
-  // Pagination range (max 5 pages visible)
   const pageRange = () => {
     const total = pagination.pages || 1;
     const delta = 2;
@@ -109,9 +158,34 @@ export default function ListToy() {
             <h1 className="public-list-toy-hero-title">🧸 Khám phá Đồ Chơi</h1>
             <p className="public-list-toy-hero-sub">Tìm kiếm và thuê đồ chơi yêu thích cho bé</p>
 
-            {/* Search & Filter bar */}
-            <Row className="g-2 align-items-end justify-content-center public-search-filter-row">
-              <Col xs={12} md={5}>
+            {/* Toggle cho Yêu thích nếu đã login */}
+            {userProfile && (
+              <Row className="justify-content-center mb-4">
+                <Col xs="auto">
+                  <div className="d-flex bg-white rounded-pill p-1 shadow-sm border">
+                    <Button 
+                      variant={!showFavoritesOnly ? "success" : "light"} 
+                      className={`rounded-pill px-4 fw-medium border-0 ${!showFavoritesOnly ? '' : 'text-secondary'}`}
+                      onClick={() => setShowFavoritesOnly(false)}
+                    >
+                      Tất cả đồ chơi
+                    </Button>
+                    <Button 
+                      variant={showFavoritesOnly ? "success" : "light"} 
+                      className={`rounded-pill px-4 fw-medium border-0 ${showFavoritesOnly ? '' : 'text-secondary'}`}
+                      onClick={() => setShowFavoritesOnly(true)}
+                    >
+                      <Heart size={16} className={showFavoritesOnly ? "me-2 text-white" : "me-2 text-danger"} fill="currentColor" /> Đồ chơi yêu thích
+                    </Button>
+                  </div>
+                </Col>
+              </Row>
+            )}
+
+            {/* Search & Filter bar - Chỉ show khi đang ở chế độ xem tất cả */}
+            {!showFavoritesOnly && (
+              <Row className="g-2 align-items-end justify-content-center public-search-filter-row">
+                <Col xs={12} md={5}>
                 <Form onSubmit={handleSearch} className="public-search-form">
                   <InputGroup className="public-input-group">
                     <InputGroup.Text className="bg-white border-end-0 public-input-group-text">
@@ -209,40 +283,51 @@ export default function ListToy() {
                 </Col>
               )}
             </Row>
+            )}
           </Container>
         </div>
 
         <Container className="py-4">
           {/* Kết quả */}
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <div className="text-muted small">
-              {loading ? 'Đang tải...' : `Tìm thấy ${pagination.total ?? 0} kết quả`}
-              {search && <span className="ms-1">cho "<strong>{search}</strong>"</span>}
-              {category && <span className="ms-1">trong <strong>{category}</strong></span>}
+          {!showFavoritesOnly && (
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <div className="text-muted small">
+                {loading ? 'Đang tải...' : `Tìm thấy ${pagination.total ?? 0} kết quả`}
+                {search && <span className="ms-1">cho "<strong>{search}</strong>"</span>}
+                {category && <span className="ms-1">trong <strong>{category}</strong></span>}
+              </div>
             </div>
-          </div>
+          )}
+
+          {showFavoritesOnly && (
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <div className="text-muted small">
+                 {loadingFavorites ? 'Đang tải...' : `Bạn có ${favoriteToysList.length} đồ chơi yêu thích`}
+              </div>
+            </div>
+          )}
 
           {/* States */}
-          {loading ? (
+          {(showFavoritesOnly ? loadingFavorites : loading) ? (
             <div className="text-center py-5">
               <Spinner animation="border" variant="success" />
               <p className="text-muted mt-2">Đang tải đồ chơi...</p>
             </div>
-          ) : error ? (
+          ) : !showFavoritesOnly && error ? (
             <div className="alert alert-danger">{error}</div>
-          ) : toys.length === 0 ? (
+          ) : (showFavoritesOnly ? favoriteToysList.length === 0 : toys.length === 0) ? (
             <div className="text-center py-5 text-muted">
-              <div style={{ fontSize: 48 }}>🔍</div>
-              <h5>Không tìm thấy đồ chơi phù hợp</h5>
-              <p>Hãy thử thay đổi từ khóa hoặc danh mục</p>
-              {activeFilterCount > 0 && (
+              <div style={{ fontSize: 48 }}>{showFavoritesOnly ? '❤️' : '🔍'}</div>
+              <h5>{showFavoritesOnly ? 'Chưa có đồ chơi yêu thích' : 'Không tìm thấy đồ chơi phù hợp'}</h5>
+              <p>{showFavoritesOnly ? 'Hãy thêm đồ chơi bạn thích bằng cách bấm vào biểu tượng 💖 nhé' : 'Hãy thử thay đổi từ khóa hoặc danh mục'}</p>
+              {!showFavoritesOnly && activeFilterCount > 0 && (
                 <Button variant="outline-success" onClick={clearFilters}>Xóa bộ lọc</Button>
               )}
             </div>
           ) : (
             <>
               <Row xs={1} sm={2} md={3} lg={4} className="g-3">
-                {toys.map((toy) => (
+                {(showFavoritesOnly ? favoriteToysList : toys).map((toy) => (
                   <Col key={toy._id}>
                     <ToyCard toy={toy} onClick={() => navigate(`/toys/${toy._id}`)} />
                   </Col>
@@ -250,7 +335,7 @@ export default function ListToy() {
               </Row>
 
               {/* Pagination */}
-              {pagination.pages > 1 && (
+              {!showFavoritesOnly && pagination.pages > 1 && (
                 <div className="d-flex justify-content-center mt-4">
                   <Pagination>
                     <Pagination.First onClick={() => setPage(1)} disabled={page === 1} />

@@ -78,6 +78,26 @@ const updateUserStatus = async (id, status) => {
     }
 };
 
+const getFavorites = async () => {
+    try {
+        const response = await axiosInstance.get(API_ENDPOINTS.FAVORITES);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching favorites:', error);
+        return error.response?.data || { success: false, message: error.message };
+    }
+};
+
+const toggleFavorite = async (toyId) => {
+    try {
+        const response = await axiosInstance.post(API_ENDPOINTS.FAVORITES, { toyId });
+        return response.data;
+    } catch (error) {
+        console.error('Error toggling favorite:', error);
+        return error.response?.data || { success: false, message: error.message };
+    }
+};
+
 export default {
     fetchProfile,
     updateProfile,
@@ -85,5 +105,7 @@ export default {
     changePassword,
     getUsers,
     updateUserRole,
-    updateUserStatus
+    updateUserStatus,
+    getFavorites,
+    toggleFavorite
 };

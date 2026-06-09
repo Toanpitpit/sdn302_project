@@ -21,7 +21,13 @@ const TOY_INITIAL_FORM = {
   description: '',
   ageRange: '',
   origin: '',
-  images: [], // List of detail image URLs
+  specifications: {
+    material: 'Wood + Plastic + Paper',
+    size: '50cm x 40cm x 10cm (khi gập)',
+    weight: '3kg',
+    requiresBattery: false
+  },
+  images: [], 
 };
 
 export default function ManageToys() {
@@ -98,7 +104,6 @@ export default function ManageToys() {
     
     if (toy) {
       try {
-        // Fetch full toy detail to get description and detail images
         const res = await toyService.getToyById(toy._id);
         if (res.success) {
           const fullToy = res.data;
@@ -110,10 +115,16 @@ export default function ManageToys() {
             depositValue: fullToy.depositValue || 0,
             status: fullToy.status || 'AVAILABLE',
             thumbnail: fullToy.thumbnail || '',
-            description: fullToy.detail?.description || '',
-            ageRange: fullToy.detail?.ageRange || '',
-            origin: fullToy.detail?.origin || '',
-            images: fullToy.detail?.images || [],
+            description: fullToy?.description || '',
+            ageRange: fullToy?.ageRange || '',
+            origin: fullToy?.origin || '',
+            specifications: fullToy?.specifications || {
+              material: '',
+              size: '',
+              weight: '',
+              requiresBattery: false
+            },
+            images: fullToy?.images || [],
           });
           setThumbPreview(fullToy.thumbnail || '');
         }
@@ -169,7 +180,6 @@ export default function ManageToys() {
     let finalThumbnail = formData.thumbnail;
     let finalImages = [...formData.images];
 
-    // 1. Upload thumbnail if chosen
     if (thumbFile) {
       const formDataThumb = new FormData();
       formDataThumb.append('images', thumbFile);
@@ -179,7 +189,6 @@ export default function ManageToys() {
       }
     }
 
-    // 2. Upload detail images if any
     if (detailFiles.length > 0) {
       const formDataDetails = new FormData();
       detailFiles.forEach(file => formDataDetails.append('images', file));
@@ -196,7 +205,6 @@ export default function ManageToys() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      // First, handle all file uploads
       const { finalThumbnail, finalImages } = await uploadFiles();
 
       const payload = {
@@ -209,6 +217,7 @@ export default function ManageToys() {
         description: formData.description,
         ageRange: formData.ageRange,
         origin: formData.origin,
+        specifications: formData.specifications,
         images: finalImages,
       };
 
@@ -216,10 +225,7 @@ export default function ManageToys() {
       if (editingToy) {
         res = await toyService.updateToy(editingToy._id, payload);
       } else {
-        res = await toyService.createToy({
-          ...payload,
-          ownerId: userProfile?._id || userProfile?.id
-        });
+        res = await toyService.createToy(payload);
       }
 
       if (res.success) {
@@ -521,6 +527,44 @@ export default function ManageToys() {
                           placeholder="Đan Mạch, Việt Nam..."
                         />
                       </Form.Group>
+                    </Col>
+                    <Col md={12}>
+                      <Form.Label className="mt-form-label fw-bold">Thông số kỹ thuật</Form.Label>
+                      <Row className="g-3">
+                        <Col md={6}>
+                          <Form.Control 
+                            className="mt-form-input shadow-none"
+                            placeholder="Chất liệu (Wood, Plastic...)"
+                            value={formData.specifications?.material || ''} 
+                            onChange={(e) => setFormData({...formData, specifications: {...formData.specifications, material: e.target.value}})} 
+                          />
+                        </Col>
+                        <Col md={6}>
+                          <Form.Control 
+                            className="mt-form-input shadow-none"
+                            placeholder="Kích thước (50cm x 40cm...)"
+                            value={formData.specifications?.size || ''} 
+                            onChange={(e) => setFormData({...formData, specifications: {...formData.specifications, size: e.target.value}})} 
+                          />
+                        </Col>
+                        <Col md={6}>
+                          <Form.Control 
+                            className="mt-form-input shadow-none"
+                            placeholder="Trọng lượng (3kg...)"
+                            value={formData.specifications?.weight || ''} 
+                            onChange={(e) => setFormData({...formData, specifications: {...formData.specifications, weight: e.target.value}})} 
+                          />
+                        </Col>
+                        <Col md={6} className="d-flex align-items-center">
+                          <Form.Check 
+                            type="switch"
+                            id="requires-battery-switch"
+                            label={<b>Cần dùng Pin (requiresBattery)</b>}
+                            checked={formData.specifications?.requiresBattery || false}
+                            onChange={(e) => setFormData({...formData, specifications: {...formData.specifications, requiresBattery: e.target.checked}})} 
+                          />
+                        </Col>
+                      </Row>
                     </Col>
                     <Col md={12}>
                       <Form.Group>

@@ -15,6 +15,7 @@ exports.getProfile = async (req, res, next) => {
             isOnline: user.isOnline,
             avatar: user.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
             status: user.status,
+            favoriteToys: user.favoriteToys || [],
             updateAt: user.updatedAt.toISOString()
         }
 
@@ -128,6 +129,52 @@ exports.updateAvatar = async (req, res, next) => {
         res.status(200).json({
             success: true,
             data: maptoResponse
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.toggleFavorite = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id);
+        const { toyId } = req.body;
+
+        if (!toyId) {
+            return res.status(400).json({ success: false, message: 'Toy ID is required' });
+        }
+
+        const toyIndex = user.favoriteToys.indexOf(toyId);
+        
+        let message = '';
+        if (toyIndex > -1) {
+            // Remove from favorites
+            user.favoriteToys.splice(toyIndex, 1);
+            message = 'Removed from favorites';
+        } else {
+            // Add to favorites
+            user.favoriteToys.push(toyId);
+            message = 'Added to favorites';
+        }
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message,
+            favoriteToys: user.favoriteToys
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getFavorites = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id).populate('favoriteToys');
+        res.status(200).json({
+            success: true,
+            data: user.favoriteToys
         });
     } catch (error) {
         next(error);

@@ -444,9 +444,22 @@ export default function BookingsPage() {
                          selectedBooking.paymentStatus === 'failed' ? 'Thất bại' : 'Chưa thanh toán'}
                       </span>
                     </div>
+
+                    {selectedBooking.status === 'COMPLETE' && selectedInspections.some(i => i.type === 'return' && i.surcharge > 0) && (
+                      <div className="mt-3 p-3 bg-danger bg-opacity-10 rounded-3 border border-danger border-opacity-25">
+                        <div className="d-flex justify-content-between text-danger mb-1">
+                          <span className="fw-bold">Phí phạt (Hư hỏng/Trễ hạn)</span>
+                          <span className="fw-bold">+{selectedInspections.find(i => i.type === 'return').surcharge.toLocaleString('vi-VN')}đ</span>
+                        </div>
+                        <div className="small text-danger fst-italic text-end">
+                          * {selectedInspections.find(i => i.type === 'return').notes || 'Phí phát sinh lúc trả đồ (sẽ trừ thẳng vào số tiền cọc hoàn lại).'}
+                        </div>
+                      </div>
+                    )}
+
                     <hr className="my-3 border-success border-opacity-25" />
                     <div className="d-flex justify-content-between text-success align-items-center">
-                      <span className="fw-bold">TỔNG CỘNG</span>
+                      <span className="fw-bold">TỔNG CỘNG BAN ĐẦU</span>
                       <span className="fw-bold fs-4">
                         {(selectedBooking.totalAmount + selectedBooking.depositAmount).toLocaleString('vi-VN')}đ
                       </span>

@@ -15,6 +15,7 @@ const API_ENDPOINTS = {
   PROFILE: '/users/me',
   CHANGE_PASSWORD: '/users/me/change_password',
   CHANGE_AVATAR: '/users/me/avatar',
+  FAVORITES: '/users/me/favorites',
   USERS: '/users',
   USER_UPDATE_ROLE: (id) => `/users/${id}/role`,
   USER_UPDATE_STATUS: (id) => `/users/${id}/status`,
@@ -26,6 +27,7 @@ const API_ENDPOINTS = {
 
   // Toys
   TOYS: '/toys',
+  TOYSMERGE: '/toymegre',
   TOY_BY_ID: (id) => `/toys/${id}`,
   TOY_FEATURED: '/toys/featured',
   TOY_PENDING: '/toys/pending',

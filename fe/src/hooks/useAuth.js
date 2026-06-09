@@ -145,6 +145,14 @@ export const AuthProvider = ({ children }) => {
         return await userService.changePassword(passwords);
     };
 
+    const toggleFavoriteWrapper = async (toyId) => {
+        const res = await userService.toggleFavorite(toyId);
+        if (res.success) {
+            setUserProfile(prev => ({ ...prev, favoriteToys: res.favoriteToys }));
+        }
+        return res;
+    };
+
     const logout = async () => {
         try {
             await authService.logout();
@@ -184,6 +192,7 @@ export const AuthProvider = ({ children }) => {
         login, register, logout,
         userProfile, getProfile,
         updateProfileWrapper, updateAvatarWrapper, changePasswordWrapper,
+        toggleFavoriteWrapper,
         forgotPasswordWrapper: async (email) => {
             setIsLoading(true);
             try {

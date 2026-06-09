@@ -42,6 +42,10 @@ const userSchema = new mongoose.Schema(
     otpExpire: {
       type: Date,
     },
+    favoriteToys: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ToyMerge',
+    }],
   },
   { timestamps: true }
 );

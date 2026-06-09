@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container, Row, Col, Button, Form, Alert, Spinner, Badge, Modal, Card
 } from 'react-bootstrap';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Heart } from 'lucide-react';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import toyService from '../../services/toyService';
@@ -21,7 +21,7 @@ const STATUS_CONFIG = {
 export default function ToyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { userProfile } = useAuth();
+  const { userProfile, toggleFavoriteWrapper } = useAuth();
   const { createBooking, loading: bookingLoading } = useBooking();
 
   const [toy, setToy] = useState(null);
@@ -48,7 +48,7 @@ export default function ToyDetail() {
   // Fetch toy data
   useEffect(() => {
     setLoading(true);
-    setActiveImg(0); // Reset active image to first one
+    setActiveImg(0);
     toyService.getToyById(id)
       .then((res) => { if (res.success) setToy(res.data); })
       .catch(() => setToy(null))
@@ -56,7 +56,6 @@ export default function ToyDetail() {
     window.scrollTo(0, 0);
   }, [id]);
 
-  // Tính toán thời gian thuê
   const pickupMs = pickupDate ? new Date(pickupDate).getTime() : 0;
   const returnMs = returnDate ? new Date(returnDate).getTime() : 0;
   const diffMs = returnMs - pickupMs;
@@ -126,8 +125,15 @@ export default function ToyDetail() {
                     toy.status !== 'AVAILABLE';
   
   // Ensure default images if none exist
-  const rawImages = [toy.thumbnail, ...(toy.detail?.images || [])].filter(Boolean);
+  const rawImages = [toy.thumbnail, ...(toy?.images || [])].filter(Boolean);
   const allImages = rawImages.length > 0 ? rawImages : ['https://via.placeholder.com/600x400?text=No+Image+Available'];
+
+  const isFavorite = userProfile?.favoriteToys?.includes(toy?._id);
+
+  const handleFavoriteClick = async () => {
+    if (!userProfile) return;
+    await toggleFavoriteWrapper(toy?._id);
+  };
 
   return (
     <div className="toy-detail-wrapper">
@@ -209,7 +215,28 @@ export default function ToyDetail() {
                   <div className="text-success small fw-bold text-uppercase mb-2" style={{ letterSpacing: '1px' }}>
                     {toy.category}
                   </div>
-                  <h2 className="toy-detail-title mb-3 fw-bold">{toy.title}</h2>
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <h2 className="toy-detail-title mb-0 fw-bold pe-3">{toy.title}</h2>
+                    <button
+                        onClick={handleFavoriteClick}
+                        style={{
+                            background: 'white',
+                            border: '1px solid #ebebeb',
+                            borderRadius: '50%',
+                            padding: '10px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                            transition: 'all 0.2sease'
+                        }}
+                        title={isFavorite ? "Gỡ khỏi yêu thích" : "Thêm vào yêu thích"}
+                        className="btn-light"
+                    >
+                        <Heart size={24} fill={isFavorite ? '#ff4757' : 'none'} color={isFavorite ? '#ff4757' : '#6b7280'} />
+                    </button>
+                  </div>
 
                   <div className="toy-detail-price-box mb-4 p-3 rounded-3" style={{ background: '#f8fdf9' }}>
                     <span className="toy-detail-price text-success h3 mb-0 fw-bold">
@@ -222,25 +249,25 @@ export default function ToyDetail() {
                   <div className="toy-detail-specs mb-4">
                     <h6 className="fw-bold mb-3 border-bottom pb-2">Thông số sản phẩm</h6>
                     <Row className="g-2">
-                      {toy.detail?.ageRange && (
-                        <Col xs={6}><div className="small"><strong>Độ tuổi:</strong> {toy.detail.ageRange}</div></Col>
+                      {toy?.ageRange && (
+                        <Col xs={6}><div className="small"><strong>Độ tuổi:</strong> {toy.ageRange}</div></Col>
                       )}
-                      {toy.detail?.origin && (
-                        <Col xs={6}><div className="small"><strong>Xuất xứ:</strong> {toy.detail.origin}</div></Col>
+                      {toy?.origin && (
+                        <Col xs={6}><div className="small"><strong>Xuất xứ:</strong> {toy.origin}</div></Col>
                       )}
-                      {toy.detail?.specifications?.material && (
-                        <Col xs={6}><div className="small"><strong>Chất liệu:</strong> {toy.detail.specifications.material}</div></Col>
+                      {toy?.specifications?.material && (
+                        <Col xs={6}><div className="small"><strong>Chất liệu:</strong> {toy.specifications.material}</div></Col>
                       )}
-                      {toy.detail?.specifications?.size && (
-                        <Col xs={6}><div className="small"><strong>Kích thước:</strong> {toy.detail.specifications.size}</div></Col>
+                      {toy?.specifications?.size && (
+                        <Col xs={6}><div className="small"><strong>Kích thước:</strong> {toy.specifications.size}</div></Col>
                       )}
                     </Row>
                   </div>
 
-                  {toy.detail?.description && (
+                  {toy?.description && (
                     <div className="mb-4">
                       <h6 className="fw-bold mb-2">Mô tả</h6>
-                      <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>{toy.detail.description}</p>
+                      <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>{toy.description}</p>
                     </div>
                   )}
 
