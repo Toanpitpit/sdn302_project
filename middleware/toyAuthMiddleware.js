@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-const Toy = require('../models/Toys');
-=======
 const Toy = require('../models/Toy');
->>>>>>> main
 
 exports.checkToyOwnership = async (req, res, next) => {
   try {
@@ -83,8 +79,5 @@ exports.requireAuth = (req, res, next) => {
   }
   next();
 };
-<<<<<<< HEAD
 
 
-=======
->>>>>>> main
