@@ -1,6 +1,7 @@
 const Booking = require('../models/Booking');
 const Toy = require('../models/Toy');
 const User = require('../models/User');
+const Cart = require('../models/Cart');
 const Transaction = require('../models/Transaction');
 const vnpayService = require('../services/vnpayService');
 
@@ -16,7 +17,7 @@ exports.createBooking = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Không tìm thấy đồ chơi.' });
     }
     if (toy.status !== 'AVAILABLE') {
-      return res.status(400).json({ success: false, message: 'Đò chơi này hiện không khả dụng để đặt thuê.' });
+      return res.status(400).json({ success: false, message: 'Đồ chơi này hiện không khả dụng để đặt thuê.' });
     }
 
     // Validate thời gian
@@ -36,6 +37,7 @@ exports.createBooking = async (req, res, next) => {
     const hours = Math.ceil((end - start) / (1000 * 60 * 60));
     const fareAmount = hours * toy.pricePerHour;
     const depositAmount = toy.depositValue;
+    const totalAmount = fareAmount + depositAmount;
 
     const booking = await Booking.create({
       renterId,
@@ -52,6 +54,12 @@ exports.createBooking = async (req, res, next) => {
     // Chuyển toy → pending to reserve it
     await Toy.findByIdAndUpdate(toyId, { status: 'PENDING' });
 
+    // Xóa toy khỏi giỏ hàng nếu nó tồn tại trong giỏ của user
+    await Cart.updateOne(
+      { userId: renterId },
+      { $pull: { items: { toyId: toyId } } }
+    );
+
     const populated = await Booking.findById(booking._id)
       .populate('renterId', 'name email phoneNumber avatar')
       .populate('toyId', 'title thumbnail pricePerHour depositValue category');
@@ -67,6 +75,8 @@ exports.createBooking = async (req, res, next) => {
 };
 
 // GET /api/bookings - Lấy danh sách đơn
+// - Customer: chỉ thấy đơn của mình
+// - Employee/Admin: thấy tất cả, filter theo customerName
 exports.getBookings = async (req, res, next) => {
   try {
     const { page = 1, limit = 10, status, search } = req.query;
@@ -228,11 +238,13 @@ exports.confirmBooking = async (req, res, next) => {
       return res.status(400).json({ success: false, message: `Không thể xác nhận đơn có trạng thái: ${booking.status}` });
     }
 
+    // Kiểm tra xem đồ chơi có còn trống không (Lưu ý: khi khách đặt đơn, toy chuyển sang PENDING)
     const toy = await Toy.findById(booking.toyId);
     if (!toy) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy đồ chơi liên quan.' });
     }
 
+    // Cho phép duyệt nếu toy đang AVAILABLE hoặc PENDING (đang đợi duyệt)
     if (toy.status !== 'AVAILABLE' && toy.status !== 'PENDING') {
       return res.status(400).json({
         success: false,
@@ -244,7 +256,7 @@ exports.confirmBooking = async (req, res, next) => {
     if (booking.paymentMethod === 'vnpay') {
       booking.status = 'WAITING_PAYMENT';
       
-      // Tạo Transaction records
+      // Tạo Transaction records ở giai đoạn này để theo dõi
       await Transaction.create({
         userId: booking.renterId,
         bookingId: booking._id,
@@ -306,6 +318,7 @@ exports.rejectBooking = async (req, res, next) => {
     await booking.save();
 
     // Cập nhật toy → available lại
+    // Lưu ý: Nếu toy.status là 'PENDING_APPROVED' thì thực tế nó đang ở trạng thái 'PENDING'
     await Toy.findByIdAndUpdate(booking.toyId, { status: 'AVAILABLE' });
 
     res.json({ success: true, message: 'Đã từ chối đơn.', data: booking });
@@ -324,12 +337,14 @@ exports.cancelBooking = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Không tìm thấy đơn.' });
     }
 
+    // Chỉ customer sở hữu đơn mới được hủy, hoặc staff
     const isOwner = booking.renterId.equals(req.user._id);
     const isStaff = ['EMPLOYEE', 'ADMIN'].includes(req.user.role);
     if (!isOwner && !isStaff) {
       return res.status(403).json({ success: false, message: 'Không có quyền hủy đơn này.' });
     }
 
+    // Chỉ cho phép hủy nếu chưa được confirm (active)
     if (!['PENDING_APPROVED', 'WAITING_PAYMENT'].includes(booking.status)) {
       return res.status(400).json({ success: false, message: 'Chỉ có thể hủy đơn khi đơn chưa bắt đầu thuê.' });
     }
@@ -357,7 +372,7 @@ exports.vnpayReturn = async (req, res, next) => {
     }
 
     const responseCode = vnp_Params['vnp_ResponseCode'];
-    const txnRef = vnp_Params['vnp_TxnRef'];
+    const txnRef = vnp_Params['vnp_TxnRef']; // bookingId_timestamp
     const bookingId = txnRef.split('_')[0];
 
     const booking = await Booking.findById(bookingId);
@@ -366,6 +381,7 @@ exports.vnpayReturn = async (req, res, next) => {
     }
 
     if (responseCode === '00') {
+      // Thành công
       booking.status = 'APPROVED';
       booking.paymentStatus = 'paid';
       await booking.save();
@@ -378,6 +394,7 @@ exports.vnpayReturn = async (req, res, next) => {
 
       res.redirect(`${process.env.VNP_RETURN_URL}?status=success&bookingId=${bookingId}`);
     } else {
+      // Thất bại
       booking.status = 'CANCELLED';
       booking.paymentStatus = 'failed';
       await booking.save();
@@ -398,7 +415,7 @@ exports.vnpayReturn = async (req, res, next) => {
   }
 };
 
-// GET /api/bookings/:id/payment-url
+// GET /api/bookings/:id/payment-url - Lấy URL thanh toán cho đơn đang WAITING_PAYMENT
 exports.getPaymentUrl = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -416,6 +433,7 @@ exports.getPaymentUrl = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Đơn hàng này không ở trạng thái chờ thanh toán.' });
     }
 
+    // Tính lại tổng tiền (Fare + Deposit)
     const fareAmount = booking.totalAmount;
     const depositAmount = booking.depositAmount;
     const totalAmount = fareAmount + depositAmount;
@@ -433,7 +451,7 @@ exports.getPaymentUrl = async (req, res, next) => {
   }
 };
 
-// GET /api/bookings/:id/pay
+// GET /api/bookings/:id/pay - Chuyển hướng trực tiếp sang VNPay
 exports.redirectToPayment = async (req, res, next) => {
   try {
     const { id } = req.params;

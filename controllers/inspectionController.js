@@ -1,6 +1,6 @@
 const Inspection = require('../models/Inspection');
 const Booking = require('../models/Booking');
-const Toy = require('../models/Toy');
+const Toy = require('../models/Toys');
 const Transaction = require('../models/Transaction');
 
 exports.createInspection = async (req, res, next) => {

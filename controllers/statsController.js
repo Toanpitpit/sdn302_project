@@ -1,14 +1,21 @@
 const Booking = require('../models/Booking');
-const Toy = require('../models/Toy');
+const Toy = require('../models/Toys');
 
 exports.getStats = async (req, res, next) => {
   try {
     const role = req.user.role;
     const userId = req.user._id;
 
+    // Based on user request "trang nhân viên vẫn hiện đầy đủ các toy , đơn hàng cần duyệt"
+    // We will allow Employees to see the global stats for Toys and Bookings
+    // but we can still keep some internal filtering if needed for other specific modules.
+    
     let toyFilter = {};
     let bookingFilter = {};
 
+    // If we want to strictly follow "Show everything for Admin and Employee"
+    // we keep filters empty.
+    
     // Quick Stats Calculation
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);

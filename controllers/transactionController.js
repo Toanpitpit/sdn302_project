@@ -40,7 +40,7 @@ exports.getTransactionsByBooking = async (req, res, next) => {
   }
 };
 
-// PATCH /api/transactions/:id/status
+// PATCH /api/transactions/:id/status - Cập nhật trạng thái (dành cho VNPay callback)
 exports.updateTransactionStatus = async (req, res, next) => {
   try {
     const { id } = req.params;

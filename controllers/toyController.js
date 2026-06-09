@@ -1,4 +1,6 @@
 const Toy = require('../models/Toy');
+const ToyDetail = require('../models/ToyDetail');
+const Toy = require('../models/Toys');
 const s3Service = require('../services/s3Service');
 
 exports.getAllToys = async (req, res, next) => {
@@ -104,7 +106,8 @@ exports.getToyById = async (req, res, next) => {
   }
 };
 
-exports.createToyMerge = async (req, res, next) => {
+
+exports.createToy = async (req, res, next) => {
   try {
     const {
       title,
@@ -189,6 +192,7 @@ exports.updateToy = async (req, res, next) => {
         await s3Service.deleteFile(imgUrl);
       }
     }
+
 
     const toy = await Toy.findByIdAndUpdate(
       id,

@@ -22,13 +22,13 @@ const bookingSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: [
-        'PENDING_APPROVED', 
-        'WAITING_PAYMENT', 
-        'APPROVED', 
-        'REJECTED', 
-        'ACTIVE', 
-        'WAITING_REFUND', 
-        'COMPLETE', 
+        'PENDING_APPROVED',
+        'WAITING_PAYMENT',
+        'APPROVED',
+        'REJECTED',
+        'ACTIVE',
+        'WAITING_REFUND',
+        'COMPLETE',
         'CANCELLED'
       ],
       default: 'PENDING_APPROVED',

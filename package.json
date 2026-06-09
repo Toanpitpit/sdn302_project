@@ -1,19 +1,19 @@
 {
-  "name": "sdn302-project-backend",
+  "name": "back-end",
   "version": "1.0.0",
-  "description": "RESTful API Backend rebuilt from scratch",
+  "description": "RESTFul API Application - Restaurant Management System",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "nodemon server"
   },
   "keywords": [
     "nodejs",
-    "express",
-    "mongodb",
-    "mongoose"
+    "restful",
+    "api",
+    "restaurant",
+    "mongodb"
   ],
-  "author": "Antigravity",
+  "author": "FPTU HN",
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1010.0",
@@ -30,7 +30,8 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.2",
     "nodemailer": "^8.0.2",
-    "qs": "^6.15.0"
+    "qs": "^6.15.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

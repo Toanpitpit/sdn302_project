@@ -4,7 +4,10 @@ const bcrypt = require('bcryptjs');
 const mailService = require('../services/mailService');
 const User = require('../models/User');
 
+
+// Generate JWT Token
 const generateTokens = (user) => {
+
   const accessToken = jwt.sign(
     { id: user._id, role: user.role },
     process.env.ACCESS_TOKEN_SECRET,
@@ -19,7 +22,6 @@ const generateTokens = (user) => {
 
   return { accessToken, refreshToken };
 };
-
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;

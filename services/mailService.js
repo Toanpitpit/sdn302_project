@@ -2,6 +2,16 @@ const nodemailer = require('nodemailer');
 const { welcomeTemplate, otpTemplate } = require('../templates/mailTemplates');
 require('dotenv').config();
 
+// Debug logs to ensure environment variables are loaded (remove in production)
+// console.log('DEBUG MAIL:', { 
+//   user: process.env.GOOGLE_MAIL_USER, 
+//   passLen: process.env.GOOGLE_MAIL_PASS?.length 
+// });
+
+/**
+ * Configure Transporter for Gmail SMTP
+ * Explicit host/port is often more reliable than 'service' shorthand.
+ */
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
@@ -12,7 +22,11 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+/**
+ * Send an email
+ */
 const sendEmail = async ({ to, subject, html, text }) => {
+    // Check for credentials before sending
     if (!process.env.GOOGLE_MAIL_USER || !process.env.GOOGLE_MAIL_PASS) {
         return { success: false, error: 'Chưa cấu hình GOOGLE_MAIL_USER hoặc GOOGLE_MAIL_PASS trong .env' };
     }

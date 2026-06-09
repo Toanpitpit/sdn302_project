@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+// server.js
+=======
+>>>>>>> main
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
@@ -21,17 +25,32 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+<<<<<<< HEAD
+// Serve static files for images
+=======
 // Serve static files for images if any
+>>>>>>> main
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 
 // Load all models (required for Mongoose populate to work correctly)
 require('./models/User');
+<<<<<<< HEAD
+require('./models/Toys');
+require('./models/Cart');
+=======
 require('./models/Toy');
+>>>>>>> main
 require('./models/Booking');
 require('./models/Inspection');
 require('./models/Transaction');
 require('./models/Rating');
 
+<<<<<<< HEAD
+
+
+// Routes
+app.use("/api", apiRouter);
+=======
 // Root Landing Page (Home Page Endpoint)
 app.get("/", (req, res) => {
   res.json({
@@ -50,6 +69,7 @@ app.get("/", (req, res) => {
     }
   });
 });
+>>>>>>> main
 
 // Health check endpoint
 app.get("/health", (req, res) => {
@@ -60,10 +80,14 @@ app.get("/health", (req, res) => {
   });
 });
 
+<<<<<<< HEAD
+
+=======
 // Routes
 app.use("/api", apiRouter);
 
 // 404 Route handler
+>>>>>>> main
 app.use((req, res, next) => {
   res.status(404).json({
     success: false,
@@ -71,11 +95,32 @@ app.use((req, res, next) => {
   });
 });
 
+<<<<<<< HEAD
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  const statusCode = err.status || 500;
+  res.status(statusCode).json({
+    success: false,
+    message: statusCode === 500 ? "Internal Server Error" : err.message
+  });
+});
+
+// Error handling middleware (must be last)
+=======
 // Centralized error handler
+>>>>>>> main
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 9999;
 app.listen(PORT, () => {
+<<<<<<< HEAD
+  console.log(`Restaurant API Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+});
+
+=======
   console.log(`Toy Rental API Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
 });
+>>>>>>> main

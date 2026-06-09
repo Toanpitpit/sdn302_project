@@ -7,6 +7,7 @@ const userController = require('../controllers/userController');
 const bookingController = require('../controllers/bookingController');
 const inspectionController = require('../controllers/inspectionController');
 const transactionController = require('../controllers/transactionController');
+const cartController = require('../controllers/cartController');
 const uploadController = require('../controllers/uploadController');
 const statsController = require('../controllers/statsController');
 const upload = require('../middleware/uploadMiddleware');
@@ -19,12 +20,10 @@ const {
 } = require('../middleware/toyAuthMiddleware');
 const {
   validateToy,
-  validateToyDetail,
   validateToyWithDetails,
   validateMongoId,
   validateToyPartialUpdate,
   validateToyStatusUpdate,
-  validateToyDetailPartialUpdate,
 } = require('../middleware/toyValidation');
 const { validateUpdateProfile, validateUpdatePassword } = require('../middleware/userMidleware');
 
@@ -50,6 +49,8 @@ router.get('/users', protect, authorize('ADMIN'), userController.getAllUsers);
 router.patch('/users/:id/role', protect, authorize('ADMIN'), userController.updateUserRole);
 router.patch('/users/:id/status', protect, authorize('ADMIN'), userController.updateUserStatus);
 
+
+
 // ==================== TOY ROUTES ====================
 router.get('/toys/featured', toyController.getFeaturedToys);
 router.get('/toys/pending', toyController.getPendingToys);
@@ -63,12 +64,18 @@ router.post(
   upload.array('images', 5),
   toyController.uploadToyImages
 );
-
-router.post('/toymegre', protect, validateToyWithDetails, toyController.createToyMerge);
+router.post('/toys', protect, validateToyWithDetails, toyController.createToy);
 
 router.put('/toys/:id', protect, validateMongoId, checkToyOwnership, validateToyPartialUpdate, toyController.updateToy);
 router.patch('/toys/:id/status', protect, validateMongoId, checkToyOwnership, validateToyStatusUpdate, toyController.updateToyStatus);
 router.delete('/toys/:id', protect, validateMongoId, checkToyOwnership, toyController.deleteToy);
+
+// ==================== CART ROUTES ====================
+router.get('/cart', protect, cartController.getCart);
+router.post('/cart', protect, cartController.addToCart);
+router.put('/cart/:itemId', protect, cartController.updateCartItem);
+router.delete('/cart/:itemId', protect, cartController.removeFromCart);
+router.delete('/cart', protect, cartController.clearCart);
 
 // ==================== BOOKING ROUTES ====================
 router.post('/bookings', protect, bookingController.createBooking);
@@ -93,6 +100,8 @@ router.post('/upload', protect, upload.array('images', 5), uploadController.uplo
 router.post('/bookings/:bookingId/transactions', protect, transactionController.createTransaction);
 router.get('/bookings/:bookingId/transactions', protect, transactionController.getTransactionsByBooking);
 router.patch('/transactions/:id/status', protect, authorize('EMPLOYEE', 'ADMIN'), transactionController.updateTransactionStatus);
+
+
 
 // ==================== STATS ROUTES ====================
 router.get('/stats', protect, statsController.getStats);

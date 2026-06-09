@@ -148,9 +148,11 @@ exports.toggleFavorite = async (req, res, next) => {
         
         let message = '';
         if (toyIndex > -1) {
+            // Remove from favorites
             user.favoriteToys.splice(toyIndex, 1);
             message = 'Removed from favorites';
         } else {
+            // Add to favorites
             user.favoriteToys.push(toyId);
             message = 'Added to favorites';
         }
@@ -232,6 +234,7 @@ exports.updateUserRole = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
+        // Không cho phép đổi role của chính mình hoặc admin hệ thống
         if (targetUser.email === 'admin@gmail.com' || targetUser._id.toString() === requester._id.toString()) {
             return res.status(403).json({ 
                 success: false, 
@@ -267,6 +270,7 @@ exports.updateUserStatus = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
+        // Không cho phép khóa tài khoản hệ thống hoặc chính mình
         if (targetUser.email === 'admin@gmail.com' || targetUser._id.toString() === requester._id.toString()) {
             return res.status(403).json({ 
                 success: false, 
