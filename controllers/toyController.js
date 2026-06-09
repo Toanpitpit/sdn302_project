@@ -1,3 +1,5 @@
+const Toy = require('../models/Toy');
+const ToyDetail = require('../models/ToyDetail');
 const Toy = require('../models/Toys');
 const s3Service = require('../services/s3Service');
 
@@ -103,58 +105,6 @@ exports.getToyById = async (req, res, next) => {
     next(error);
   }
 };
-
-// exports.createToy = async (req, res, next) => {
-//   try {
-//     const {
-//       title,
-//       category,
-//       thumbnail,
-//       pricePerHour,
-//       depositValue,
-//       status,
-//       description,
-//       images,
-//       specifications,
-//       ageRange,
-//       origin
-//     } = req.body;
-
-//     const toy = new Toy({
-//       title,
-//       category,
-//       thumbnail,
-//       pricePerHour,
-//       depositValue,
-//       status: status || 'AVAILABLE'
-//     });
-
-//     const savedToy = await toy.save();
-
-//     const toyDetail = new ToyDetail({
-//       toyId: savedToy._id,
-//       description,
-//       images: images || [],
-//       specifications: specifications || {},
-//       ageRange,
-//       origin
-//     });
-
-
-//     await toyDetail.save();
-
-//     res.status(201).json({
-//       success: true,
-//       message: 'Toy created successfully',
-//       data: {
-//         ...savedToy.toObject(),
-//         detail: toyDetail
-//       }
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 
 
 exports.createToy = async (req, res, next) => {

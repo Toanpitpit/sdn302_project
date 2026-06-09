@@ -14,7 +14,6 @@ const generateTokens = (user) => {
     { expiresIn: '1h' }
   );
 
-
   const refreshToken = jwt.sign(
     { id: user._id },
     process.env.REFRESH_TOKEN_SECRET,
@@ -68,7 +67,7 @@ exports.login = async (req, res, next) => {
 
     const { accessToken, refreshToken } = generateTokens(user);
 
-    const result = await User.findByIdAndUpdate(user._id, { token: refreshToken });
+    await User.findByIdAndUpdate(user._id, { token: refreshToken });
     res.status(200).json({
       success: true,
       message: 'Login successful.',
@@ -116,10 +115,7 @@ exports.createAccount = async (req, res, next) => {
 exports.logout = async (req, res, next) => {
   try {
     const user = req.user;
-    console.log("Logging out user:", user._id);
-
-    const result = await User.findByIdAndUpdate(user._id, { token: null });
-    console.log(result);
+    await User.findByIdAndUpdate(user._id, { token: null });
 
     res.status(200).json({
       success: true,
@@ -223,7 +219,6 @@ exports.resetPassword = async (req, res, next) => {
   }
 };
 
-// get new accessToken by refreshToken 
 exports.refreshAccessToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
@@ -275,12 +270,3 @@ exports.refreshAccessToken = async (req, res, next) => {
     next(error);
   }
 };
-
-
-
-
-
-
-
-
-

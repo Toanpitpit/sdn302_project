@@ -1,5 +1,5 @@
 const Booking = require('../models/Booking');
-const Toy = require('../models/Toys');
+const Toy = require('../models/Toy');
 const User = require('../models/User');
 const Cart = require('../models/Cart');
 const Transaction = require('../models/Transaction');
@@ -326,7 +326,6 @@ exports.rejectBooking = async (req, res, next) => {
     next(error);
   }
 };
-
 
 // PATCH /api/bookings/:id/cancel - Khách tự hủy đơn
 exports.cancelBooking = async (req, res, next) => {

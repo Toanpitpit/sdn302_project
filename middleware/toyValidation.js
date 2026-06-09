@@ -16,7 +16,6 @@ const handleValidationErrors = (req, res, next) => {
 };
 
 exports.validateToy = [
-
   body('title')
     .notEmpty().withMessage('title is required')
     .trim()
