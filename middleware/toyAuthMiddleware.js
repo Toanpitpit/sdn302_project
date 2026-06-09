@@ -79,8 +79,5 @@ exports.requireAuth = (req, res, next) => {
   }
   next();
 };
-<<<<<<< HEAD
 
 
-=======
->>>>>>> main
