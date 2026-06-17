@@ -5,8 +5,6 @@
 
 # Dependencies
 node_modules/
-package-lock.json
-yarn.lock
 
 # Logs
 logs/
@@ -14,46 +12,17 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
 
 # Uploaded Files
-assets/images/dishes/*
-!assets/images/dishes/.gitkeep
+assets/
+uploads/
 
-# IDE and Editor
+# IDE and Editor configs
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 .DS_Store
-Thumbs.db
-*.sublime-project
-*.sublime-workspace
-
-# OS
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Build
-dist/
-build/
-out/
-
-# Runtime
-.nodemon.json
-.pm2.json
-
-# Temporary
-tmp/
-temp/
-*.tmp
-
-# Testing
-coverage/
-.nyc_output/
-
-# Database backups
-*.db.bak
-*.dump

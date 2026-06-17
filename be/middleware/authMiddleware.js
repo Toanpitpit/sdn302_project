@@ -113,4 +113,3 @@ exports.validateRegister = async (req, res, next) => {
 
   next();
 }
-

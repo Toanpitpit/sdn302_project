@@ -327,7 +327,6 @@ exports.rejectBooking = async (req, res, next) => {
   }
 };
 
-
 // PATCH /api/bookings/:id/cancel - Khách tự hủy đơn
 exports.cancelBooking = async (req, res, next) => {
   try {

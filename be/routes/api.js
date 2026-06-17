@@ -81,8 +81,8 @@ router.delete('/cart', protect, cartController.clearCart);
 router.post('/bookings', protect, bookingController.createBooking);
 router.get('/bookings', protect, bookingController.getBookings);
 router.get('/bookings/:id', protect, bookingController.getBookingById);
-router.patch('/bookings/:id/confirm', protect, authorize('EMPLOYEE', 'ADMIN'), bookingController.confirmBooking);
-router.patch('/bookings/:id/reject', protect, authorize('EMPLOYEE', 'ADMIN'), bookingController.rejectBooking);
+router.patch('/bookings/:id/confirm', protect, authorize('EMPLOYEE'), bookingController.confirmBooking);
+router.patch('/bookings/:id/reject', protect, authorize('EMPLOYEE'), bookingController.rejectBooking);
 router.patch('/bookings/:id/cancel', protect, bookingController.cancelBooking);
 router.get('/bookings/:id/payment-url', protect, bookingController.getPaymentUrl);
 router.get('/bookings/:id/pay', protect, bookingController.redirectToPayment);
@@ -100,9 +100,6 @@ router.post('/upload', protect, upload.array('images', 5), uploadController.uplo
 router.post('/bookings/:bookingId/transactions', protect, transactionController.createTransaction);
 router.get('/bookings/:bookingId/transactions', protect, transactionController.getTransactionsByBooking);
 router.patch('/transactions/:id/status', protect, authorize('EMPLOYEE', 'ADMIN'), transactionController.updateTransactionStatus);
-
-
-
 // ==================== STATS ROUTES ====================
 router.get('/stats', protect, statsController.getStats);
 
