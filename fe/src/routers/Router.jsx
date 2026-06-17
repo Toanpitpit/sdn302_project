@@ -4,11 +4,11 @@ import { Login, Register, ResetPassword, VerifyOTP } from "../components/auth";
 // import ListToy from "../pages/PublicPage/ListToy";
 // import ToyDetail from "../pages/PublicPage/ToyDetail";
 // import BookingsPage from "../pages/PublicPage/BookingsPage";
-// import AdminDashboard from "../pages/AdminPage/AdminDashboard";
+import AdminDashboard from "../pages/AdminPage/AdminDashboard";
 // import ManageToys from "../pages/AdminPage/ManageToys";
 // import ManageBookings from "../pages/AdminPage/ManageBookings";
 // import ManageInspections from "../pages/AdminPage/ManageInspections";
-// import ManageUsers from "../pages/AdminPage/ManageUsers";
+import ManageUsers from "../pages/AdminPage/ManageUsers";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { AuthProvider } from '../hooks/useAuth';
 import ProtectedRoute from '../components/ProtectedRoute';
@@ -74,12 +74,12 @@ function AppRoutesInternal({ navigate }) {
         }
       />
 
-      {/* Admin/Employee Management - Placeholder cho Người 2 và 3 */}
-      {/* <Route path="/admin" element={
+      {/* Admin/Employee Management - Người 2 đã thêm Dashboard & Users */}
+      <Route path="/admin" element={
         <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
           <AdminDashboard />
         </ProtectedRoute>
-      } /> */}
+      } />
       {/* <Route path="/admin/toys" element={
         <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
           <ManageToys />
@@ -95,18 +95,18 @@ function AppRoutesInternal({ navigate }) {
           <ManageInspections />
         </ProtectedRoute>
       } /> */}
-      {/* <Route path="/admin/users" element={
+      <Route path="/admin/users" element={
         <ProtectedRoute allowedRoles={['ADMIN']}>
           <ManageUsers />
         </ProtectedRoute>
-      } /> */}
+      } />
 
       {/* Legacy redirects / Role entry points */}
-      {/* <Route path="/employee" element={
+      <Route path="/employee" element={
          <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
             <AdminDashboard />
          </ProtectedRoute>
-      } /> */}
+      } />
     </Routes>
   );
 }
