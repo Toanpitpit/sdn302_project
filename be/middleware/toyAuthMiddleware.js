@@ -1,4 +1,4 @@
-const Toy = require('../models/Toy');
+const Toy = require('../models/Toys');
 
 exports.checkToyOwnership = async (req, res, next) => {
   try {

@@ -1,5 +1,3 @@
-const Toy = require('../models/Toy');
-const ToyDetail = require('../models/ToyDetail');
 const Toy = require('../models/Toys');
 const s3Service = require('../services/s3Service');
 
@@ -326,3 +324,5 @@ exports.getAllCategories = async (req, res, next) => {
     next(error);
   }
 };
+
+
