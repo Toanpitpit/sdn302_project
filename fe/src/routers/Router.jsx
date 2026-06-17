@@ -4,11 +4,18 @@ import { Login, Register, ResetPassword, VerifyOTP } from "../components/auth";
 // import ListToy from "../pages/PublicPage/ListToy";
 // import ToyDetail from "../pages/PublicPage/ToyDetail";
 // import BookingsPage from "../pages/PublicPage/BookingsPage";
-// import AdminDashboard from "../pages/AdminPage/AdminDashboard";
-// import ManageToys from "../pages/AdminPage/ManageToys";
-// import ManageBookings from "../pages/AdminPage/ManageBookings";
-// import ManageInspections from "../pages/AdminPage/ManageInspections";
-// import ManageUsers from "../pages/AdminPage/ManageUsers";
+
+// === Người 2: Admin Layout, Dashboard, ManageUsers ===
+import AdminDashboard from "../pages/AdminPage/AdminDashboard";
+import ManageUsers from "../pages/AdminPage/ManageUsers";
+// import AdminSystemPage from "../pages/AdminPage/AdminSystemPage";
+// import EmployeeDashboard from "../pages/AdminPage/EmployeeDashboard";
+
+// === Người 3: ManageToys, ManageBookings, ManageInspections ===
+import ManageToys from "../pages/AdminPage/ManageToys";
+import ManageBookings from "../pages/AdminPage/ManageBookings";
+import ManageInspections from "../pages/AdminPage/ManageInspections";
+
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { AuthProvider } from '../hooks/useAuth';
 import ProtectedRoute from '../components/ProtectedRoute';
@@ -28,7 +35,7 @@ export default function AppRoutes() {
 function AppRoutesInternal({ navigate }) {
   return (
     <Routes>
-      {/* Public - Tạm thời điều hướng về login */}
+      {/* Public - Tạm thời điều hướng về login (PublicPage chưa chuyển) */}
       <Route path="/" element={<Navigate to="/login" replace />} />
       {/* <Route path="/toys" element={<ListToy />} /> */}
       {/* <Route path="/toys/:id" element={<ToyDetail />} /> */}
@@ -38,7 +45,7 @@ function AppRoutesInternal({ navigate }) {
       {/* User */}
       {/* <Route path="/profile" element={<ProfilePage />} /> */}
 
-      {/* Auth */}
+      {/* Auth - Người 1 */}
       <Route
         path="/login"
         element={
@@ -74,39 +81,41 @@ function AppRoutesInternal({ navigate }) {
         }
       />
 
-      {/* Admin/Employee Management - Placeholder cho Người 2 và 3 */}
-      {/* <Route path="/admin" element={
+      {/* Admin/Employee Management - Người 2 + Người 3 */}
+      <Route path="/admin" element={
         <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
           <AdminDashboard />
         </ProtectedRoute>
-      } /> */}
-      {/* <Route path="/admin/toys" element={
-        <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
-          <ManageToys />
-        </ProtectedRoute>
-      } /> */}
-      {/* <Route path="/admin/bookings" element={
-        <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
-          <ManageBookings />
-        </ProtectedRoute>
-      } /> */}
-      {/* <Route path="/admin/inspections" element={
-        <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
-          <ManageInspections />
-        </ProtectedRoute>
-      } /> */}
-      {/* <Route path="/admin/users" element={
+      } />
+      <Route path="/admin/users" element={
         <ProtectedRoute allowedRoles={['ADMIN']}>
           <ManageUsers />
         </ProtectedRoute>
-      } /> */}
+      } />
 
-      {/* Legacy redirects / Role entry points */}
-      {/* <Route path="/employee" element={
-         <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
-            <AdminDashboard />
-         </ProtectedRoute>
-      } /> */}
+      {/* Người 3: Quản lý nghiệp vụ lõi */}
+      <Route path="/admin/toys" element={
+        <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
+          <ManageToys />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/bookings" element={
+        <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
+          <ManageBookings />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/inspections" element={
+        <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
+          <ManageInspections />
+        </ProtectedRoute>
+      } />
+
+      {/* Legacy redirects */}
+      <Route path="/employee" element={
+        <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
+          <AdminDashboard />
+        </ProtectedRoute>
+      } />
     </Routes>
   );
 }
