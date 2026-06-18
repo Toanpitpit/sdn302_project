@@ -1,23 +1,15 @@
 const mongoose = require('mongoose');
 
-const categorySchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-    },
-    description: {
-        type: String,
-    }
-}, { _id: false });
-
 const toysSchema = new mongoose.Schema(
     {
-
         title: {
             type: String,
             required: true,
         },
-        category: [categorySchema],
+        category: {
+            type: String,
+            required: true,
+        },
         thumbnail: {
             type: String,
         },

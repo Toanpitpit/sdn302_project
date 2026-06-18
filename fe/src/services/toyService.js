@@ -98,6 +98,16 @@ const uploadToyImages = async (formData) => {
     }
 };
 
+const getFeaturedToys = async () => {
+    try {
+        const response = await axiosInstance.get(API_ENDPOINTS.TOY_FEATURED);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching featured toys:', error);
+        throw error;
+    }
+};
+
 export default {
     getAllToys,
     getToyById,
@@ -105,9 +115,12 @@ export default {
     getToyByCategory,
     getToyAvailable,
     getToyByStatus,
+    getFeaturedToys,
     createToy,
     updateToy,
     updateToyStatus,
     deleteToy,
     uploadToyImages
 };
+
+
