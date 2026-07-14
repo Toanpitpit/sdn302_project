@@ -1,9 +1,9 @@
 import { Login, Register, ResetPassword, VerifyOTP } from "../components/auth";
-// import HomePage from "../pages/PublicPage/HomePage";
-// import ProfilePage from "../pages/PublicPage/ProfilePage";
-// import ListToy from "../pages/PublicPage/ListToy";
-// import ToyDetail from "../pages/PublicPage/ToyDetail";
-// import BookingsPage from "../pages/PublicPage/BookingsPage";
+import HomePage from "../pages/PublicPage/HomePage";
+import ProfilePage from "../pages/PublicPage/ProfilePage";
+import ListToy from "../pages/PublicPage/ListToy";
+import ToyDetail from "../pages/PublicPage/ToyDetail";
+import BookingsPage from "../pages/PublicPage/BookingsPage";
 import AdminDashboard from "../pages/AdminPage/AdminDashboard";
 // import ManageToys from "../pages/AdminPage/ManageToys";
 // import ManageBookings from "../pages/AdminPage/ManageBookings";
@@ -28,15 +28,27 @@ export default function AppRoutes() {
 function AppRoutesInternal({ navigate }) {
   return (
     <Routes>
-      {/* Public - Tạm thời điều hướng về login */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      {/* <Route path="/toys" element={<ListToy />} /> */}
-      {/* <Route path="/toys/:id" element={<ToyDetail />} /> */}
-      {/* <Route path="/bookings" element={<BookingsPage />} /> */}
-      {/* <Route path="/payment-callback" element={<BookingsPage />} /> */}
+      {/* Public */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/toys" element={<ListToy />} />
+      <Route path="/toys/:id" element={<ToyDetail />} />
+      <Route path="/bookings" element={
+        <ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN', 'EMPLOYEE']}>
+          <BookingsPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/payment-callback" element={
+        <ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN', 'EMPLOYEE']}>
+          <BookingsPage />
+        </ProtectedRoute>
+      } />
 
       {/* User */}
-      {/* <Route path="/profile" element={<ProfilePage />} /> */}
+      <Route path="/profile" element={
+        <ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN', 'EMPLOYEE']}>
+          <ProfilePage />
+        </ProtectedRoute>
+      } />
 
       {/* Auth */}
       <Route
