@@ -55,6 +55,9 @@ const API_ENDPOINTS = {
   // Legacy
   CONFIG: '/config',
   CONFIGS: '/configs',
+
+  // Upload
+  UPLOAD: '/upload',
 };
 
 export default API_ENDPOINTS;
