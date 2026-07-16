@@ -79,7 +79,7 @@ exports.createBooking = async (req, res, next) => {
 // - Employee/Admin: thấy tất cả, filter theo customerName
 exports.getBookings = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, status, search } = req.query;
+    const { page = 1, limit = 10, status, search, startDate, endDate } = req.query;
     const isStaff = ['EMPLOYEE', 'ADMIN'].includes(req.user.role);
 
     // Filter cơ bản
@@ -89,31 +89,47 @@ exports.getBookings = async (req, res, next) => {
     }
     if (status && status !== 'ALL') matchQuery.status = status;
 
+    // Filter theo ngày thuê
+    if (startDate || endDate) {
+      matchQuery.startDate = {};
+      if (startDate) matchQuery.startDate.$gte = new Date(`${startDate}T00:00:00+07:00`);
+      if (endDate) {
+        matchQuery.startDate.$lte = new Date(`${endDate}T23:59:59.999+07:00`);
+      }
+    }
+
     const skip = (page - 1) * parseInt(limit);
 
     // Pipeline chính dùng facet để lấy cả data và total count
     const pipeline = [
       { $match: matchQuery },
+      // Convert to ObjectId in case they were stored as strings
+      {
+        $addFields: {
+          toyIdObj: { $toObjectId: '$toyId' },
+          renterIdObj: { $toObjectId: '$renterId' }
+        }
+      },
       // Lookup Toy để tìm kiếm theo tên
       {
         $lookup: {
           from: 'toys',
-          localField: 'toyId',
+          localField: 'toyIdObj',
           foreignField: '_id',
           as: 'toy'
         }
       },
-      { $unwind: '$toy' },
+      { $unwind: { path: '$toy', preserveNullAndEmptyArrays: true } },
       // Lookup Renter
       {
         $lookup: {
           from: 'users',
-          localField: 'renterId',
+          localField: 'renterIdObj',
           foreignField: '_id',
           as: 'renter'
         }
       },
-      { $unwind: '$renter' },
+      { $unwind: { path: '$renter', preserveNullAndEmptyArrays: true } },
       // Lọc theo từ khóa (tên đồ chơi hoặc tên người thuê nếu là staff)
       ...(search ? [{
         $match: {
