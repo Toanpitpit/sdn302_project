@@ -108,6 +108,16 @@ const getFeaturedToys = async () => {
     }
 };
 
+const getToyReviews = async (id) => {
+    try {
+        const response = await axiosInstance.get(`${API_ENDPOINTS.TOYS}/${id}/reviews`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching toy reviews:', error);
+        throw error;
+    }
+};
+
 export default {
     getAllToys,
     getToyById,
@@ -120,7 +130,8 @@ export default {
     updateToy,
     updateToyStatus,
     deleteToy,
-    uploadToyImages
+    uploadToyImages,
+    getToyReviews
 };
 
 

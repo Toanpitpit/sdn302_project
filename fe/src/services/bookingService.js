@@ -71,6 +71,16 @@ const getPaymentUrl = async (id) => {
   }
 };
 
+const createReview = async (bookingId, reviewData) => {
+  try {
+    const response = await axiosInstance.post(`${API_ENDPOINTS.BOOKINGS}/${bookingId}/reviews`, reviewData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating review:', error);
+    throw error;
+  }
+};
+
 export default {
   createBooking,
   getBookings,
@@ -79,4 +89,5 @@ export default {
   rejectBooking,
   cancelBooking,
   getPaymentUrl,
+  createReview,
 };

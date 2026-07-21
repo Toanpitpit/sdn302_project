@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Table, Badge, Button, Spinner, Alert, Card } from 'react-bootstrap';
+import { Container, Table, Badge, Button, Spinner, Alert, Card, Modal, Form } from 'react-bootstrap';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Calendar, CreditCard, XCircle, Info, CalendarRange, MapPin, CheckCircle, ExternalLink } from 'lucide-react';
+import { Calendar, CreditCard, XCircle, Info, CalendarRange, MapPin, CheckCircle, ExternalLink, Star } from 'lucide-react';
 import bookingService from '../../services/bookingService';
 import useAuth from '../../hooks/useAuth';
 import Header from '../../components/Header';
@@ -17,6 +17,13 @@ export default function BookingsPage() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState(null);
+
+  // Review state
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const fetchBookings = useCallback(async () => {
     try {
@@ -86,6 +93,32 @@ export default function BookingsPage() {
     } catch (err) {
       toast.error('Failed to connect to payment provider.');
     }
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    setSubmittingReview(true);
+    try {
+      const res = await bookingService.createReview(selectedBookingId, { stars: rating, comment });
+      if (res.success) {
+        toast.success(res.message || 'Review submitted successfully!');
+        setShowReviewModal(false);
+        fetchBookings();
+      } else {
+        toast.error(res.message || 'Failed to submit review.');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error submitting review.');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const openReviewModal = (bookingId) => {
+    setSelectedBookingId(bookingId);
+    setRating(5);
+    setComment('');
+    setShowReviewModal(true);
   };
 
   const getStatusBadge = (status) => {
@@ -227,6 +260,17 @@ export default function BookingsPage() {
                             </Button>
                           )}
 
+                          {booking.status === 'COMPLETE' && (
+                            <Button
+                              variant="outline-warning"
+                              size="sm"
+                              className="d-flex align-items-center gap-1 px-3 rounded-pill fw-bold"
+                              onClick={() => openReviewModal(booking._id)}
+                            >
+                              <Star size={14} /> Review
+                            </Button>
+                          )}
+
                           {!['PENDING_APPROVED', 'WAITING_PAYMENT'].includes(booking.status) && (
                             <Button
                               as={Link}
@@ -248,6 +292,53 @@ export default function BookingsPage() {
           </div>
         )}
       </Container>
+
+      <Modal show={showReviewModal} onHide={() => setShowReviewModal(false)} centered>
+        <Form onSubmit={handleReviewSubmit}>
+          <Modal.Header closeButton>
+            <Modal.Title>Leave a Review</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form.Group className="mb-3 text-center">
+              <Form.Label className="d-block fw-bold">Rating</Form.Label>
+              <div className="d-flex justify-content-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    size={32}
+                    className="cursor-pointer"
+                    style={{
+                      fill: star <= rating ? '#ffc107' : 'none',
+                      color: star <= rating ? '#ffc107' : '#dee2e6',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setRating(star)}
+                  />
+                ))}
+              </div>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-bold">Comment</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Share your experience with this toy..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                required
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowReviewModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="success" type="submit" disabled={submittingReview}>
+              {submittingReview ? 'Submitting...' : 'Submit Review'}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
 
       <Footer />
     </div>

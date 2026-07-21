@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Spinner, Badge, Alert } from 'react-bootstrap';
-import { Calendar, Shield, Heart, MapPin, CheckCircle, Info, Sparkles, Box, Hammer, Activity } from 'lucide-react';
+import { Calendar, Shield, Heart, MapPin, CheckCircle, Info, Sparkles, Box, Hammer, Activity, Star, User } from 'lucide-react';
 import toyService from '../../services/toyService';
 import bookingService from '../../services/bookingService';
 import useAuth from '../../hooks/useAuth';
@@ -26,17 +26,24 @@ export default function ToyDetail() {
   const [message, setMessage] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     async function loadToy() {
       try {
         setLoading(true);
-        const res = await toyService.getToyById(id);
+        const [res, reviewRes] = await Promise.all([
+          toyService.getToyById(id),
+          toyService.getToyReviews(id).catch(() => ({ success: true, data: [] }))
+        ]);
         if (res.success) {
           setToy(res.data);
           setActiveImage(res.data.thumbnail || '');
         } else {
           toast.error(res.message || 'Could not load toy detail');
+        }
+        if (reviewRes && reviewRes.success) {
+          setReviews(reviewRes.data || []);
         }
       } catch (err) {
         toast.error('Server error loading toy details');
@@ -202,6 +209,10 @@ export default function ToyDetail() {
 
   const { hours, fare, deposit, total } = getEstimatedCost();
   const allImages = [toy.thumbnail, ...(toy.images || [])].filter(Boolean);
+
+  const averageRating = reviews.length > 0 
+    ? (reviews.reduce((acc, curr) => acc + curr.stars, 0) / reviews.length).toFixed(1)
+    : 0;
 
   return (
     <div className="toy-detail-page">
@@ -436,6 +447,63 @@ export default function ToyDetail() {
                 </Form>
               </div>
             )}
+          </Col>
+        </Row>
+
+        {/* Reviews Section */}
+        <Row className="mt-5">
+          <Col lg={12}>
+            <div className="bg-white p-4 border rounded-4 shadow-sm">
+              <h4 className="fw-bold mb-4 d-flex align-items-center gap-2">
+                <Star size={24} className="text-warning fill-warning" style={{ fill: '#ffc107' }} />
+                Customer Reviews ({reviews.length})
+                {reviews.length > 0 && <span className="ms-2 badge bg-success fs-6">{averageRating} / 5</span>}
+              </h4>
+              
+              {reviews.length === 0 ? (
+                <div className="text-center py-4 text-muted">
+                  <p className="mb-0">No reviews yet for this toy. Rent it and be the first to leave a review!</p>
+                </div>
+              ) : (
+                <div className="d-flex flex-column gap-4">
+                  {reviews.map((review) => (
+                    <div key={review._id} className="d-flex gap-3 border-bottom pb-4 last-border-0">
+                      <div className="flex-shrink-0">
+                        {review.fromUserId?.avatar ? (
+                          <img 
+                            src={review.fromUserId.avatar} 
+                            alt={review.fromUserId.name} 
+                            className="rounded-circle"
+                            style={{ width: '48px', height: '48px', objectFit: 'cover' }} 
+                          />
+                        ) : (
+                          <div className="bg-light rounded-circle d-flex align-items-center justify-content-center text-muted" style={{ width: '48px', height: '48px' }}>
+                            <User size={24} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-grow-1">
+                        <div className="d-flex align-items-center justify-content-between mb-1">
+                          <h6 className="fw-bold mb-0">{review.fromUserId?.name || 'Anonymous User'}</h6>
+                          <small className="text-muted">{new Date(review.createdAt).toLocaleDateString()}</small>
+                        </div>
+                        <div className="d-flex mb-2">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star 
+                              key={star} 
+                              size={14} 
+                              className={star <= review.stars ? 'text-warning' : 'text-muted'} 
+                              style={{ fill: star <= review.stars ? '#ffc107' : 'none', marginRight: '2px' }}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-muted mb-0" style={{ fontSize: '0.95rem' }}>{review.comment}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </Col>
         </Row>
       </Container>

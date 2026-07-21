@@ -4,7 +4,7 @@ const ratingSchema = new mongoose.Schema(
   {
     rentalId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Rental',
+      ref: 'Booking',
       required: true,
     },
     fromUserId: {

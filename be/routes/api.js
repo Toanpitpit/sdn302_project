@@ -10,6 +10,7 @@ const transactionController = require('../controllers/transactionController');
 const cartController = require('../controllers/cartController');
 const uploadController = require('../controllers/uploadController');
 const statsController = require('../controllers/statsController');
+const ratingController = require('../controllers/ratingController');
 const upload = require('../middleware/uploadMiddleware');
 
 const { protect, authorize, validateRegister } = require('../middleware/authMiddleware');
@@ -69,6 +70,7 @@ router.post('/toys', protect, validateToyWithDetails, toyController.createToy);
 router.put('/toys/:id', protect, validateMongoId, checkToyOwnership, validateToyPartialUpdate, toyController.updateToy);
 router.patch('/toys/:id/status', protect, validateMongoId, checkToyOwnership, validateToyStatusUpdate, toyController.updateToyStatus);
 router.delete('/toys/:id', protect, validateMongoId, checkToyOwnership, toyController.deleteToy);
+router.get('/toys/:id/reviews', ratingController.getToyRatings);
 
 // ==================== CART ROUTES ====================
 router.get('/cart', protect, cartController.getCart);
@@ -87,6 +89,7 @@ router.patch('/bookings/:id/cancel', protect, bookingController.cancelBooking);
 router.get('/bookings/:id/payment-url', protect, bookingController.getPaymentUrl);
 router.get('/bookings/:id/pay', protect, bookingController.redirectToPayment);
 router.get('/vnpay_return', bookingController.vnpayReturn);
+router.post('/bookings/:bookingId/reviews', protect, ratingController.createRating);
 
 // ==================== INSPECTION ROUTES ====================
 router.get('/inspections', protect, authorize('EMPLOYEE', 'ADMIN'), inspectionController.getAllInspections);
